@@ -1,0 +1,28 @@
+# 서버 포트 설정 (Vue 3000번과 겹치지 않게 기본 8080 사용)
+server:
+  port: ${PORT:8081}
+
+spring:
+  # 데이터베이스 연결 정보 (Supabase PostgreSQL)
+  datasource:
+    url: jdbc:postgresql://aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres?prepareThreshold=0
+    username: postgres.acygvnpokclaatxbdgco
+    password: chqkqsiasia7!
+    driver-class-name: org.postgresql.Driver
+
+  # JPA (Hibernate) 설정
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      # none: DB 테이블을 자동으로 건드리지 않음 (SQL로 직접 관리할 것이므로 이게 안전함)
+      ddl-auto: none
+    properties:
+      hibernate:
+        # 실행되는 SQL 쿼리를 콘솔창에 예쁘게 출력
+        show_sql: true
+        format_sql: true
+
+# Supabase JWT 토큰 시크릿키 (추후 로그인 연동 시 사용하기 위해 미리 자리만 만들어둠)
+supabase:
+  jwt:
+    secret: [YOUR_SUPABASE_JWT_SECRET]
