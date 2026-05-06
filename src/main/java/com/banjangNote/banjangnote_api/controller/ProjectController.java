@@ -17,7 +17,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class ProjectController {
     private final ProjectRepository projectRepository;
     private final ClientRepository clientRepository;
