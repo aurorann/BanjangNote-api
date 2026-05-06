@@ -1,14 +1,11 @@
 package com.banjangNote.banjangnote_api.controller;
 
-import com.banjangNote.banjangnote_api.entity.Assignment;
-import com.banjangNote.banjangnote_api.entity.Client;
-import com.banjangNote.banjangnote_api.entity.Project;
-import com.banjangNote.banjangnote_api.entity.Worker;
-import com.banjangNote.banjangnote_api.repository.AssignmentRepository;
-import com.banjangNote.banjangnote_api.repository.ClientRepository;
-import com.banjangNote.banjangnote_api.repository.ProjectRepository;
-import com.banjangNote.banjangnote_api.repository.WorkerRepository;
+import com.banjangNote.banjangnote_api.entity.*;
+import com.banjangNote.banjangnote_api.repository.*;
+import com.banjangNote.banjangnote_api.service.AuthService;
+import com.banjangNote.banjangnote_api.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,35 +19,73 @@ public class ProjectController {
     private final ClientRepository clientRepository;
     private final AssignmentRepository assignmentRepository;
     private final WorkerRepository workerRepository;
+    private final AuthService authService;
 
-    // 1. 전체 현장 목록 조회
-    @GetMapping
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll();
-    }
-
-    // 2. 특정 현장 1개 상세 조회 (현장 상세 화면 상단 정보용)
     @GetMapping("/{id}")
     public Project getProjectById(@PathVariable Long id) {
         return projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 현장이 없습니다. id=" + id));
     }
 
-    // 🔥 1. 현장 및 작업자 최초 등록 (POST)
     @PostMapping
-    public Project createProject(@RequestBody Map<String, Object> payload) {
-        Project savedProject = saveProjectDetails(new Project(), payload);
-        saveWorkersToProject(savedProject, (List<Map<String, Object>>) payload.get("workers"));
-        return savedProject;
+    public Project createProject(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Project project) {
+
+        Member member = authService.getMemberFromHeader(authHeader);
+        project.setMember(member);
+
+        return projectRepository.save(project);
     }
 
-    // 🔥 2. 현장 및 작업자 정보 수정 (PUT)
+    @GetMapping
+    public List<Project> getMyProjects(@RequestHeader("Authorization") String authHeader) {
+
+        Member member = authService.getMemberFromHeader(authHeader);
+        return projectRepository.findByMember(member); // 내 현장만 가져오기
+    }
+
     @PutMapping("/{id}")
-    public Project updateProject(@PathVariable Long id, @RequestBody Map<String, Object> payload) {
-        Project existingProject = projectRepository.findById(id).orElseThrow();
+    public Project updateProject(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader, // 🔥 토큰 받기
+            @RequestBody Map<String, Object> payload) {
+
+        Member member = authService.getMemberFromHeader(authHeader);
+        Project existingProject = projectRepository.findById(id)
+                                                   .orElseThrow(() -> new RuntimeException("해당 현장을 찾을 수 없습니다."));
+
+        // 🚨 권한 체크: DB에 저장된 현장의 주인 ID와, 지금 요청한 사람의 ID가 같은지 확인!
+        if (!existingProject.getMember().getId().equals(member.getId())) {
+            throw new RuntimeException("이 현장을 수정할 권한이 없습니다.");
+        }
+
+        // 권한이 확인되면 기존 로직 수행
         Project updatedProject = saveProjectDetails(existingProject, payload);
         saveWorkersToProject(updatedProject, (List<Map<String, Object>>) payload.get("workers"));
+
         return updatedProject;
+    }
+
+    // 🗑️ 4. 현장 삭제 (내 현장만 삭제 가능)
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProject(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) { // 🔥 토큰 받기
+
+        Member member = authService.getMemberFromHeader(authHeader);
+        Project existingProject = projectRepository.findById(id)
+                                                   .orElseThrow(() -> new RuntimeException("해당 현장을 찾을 수 없습니다."));
+
+        // 🚨 권한 체크: 내 현장이 맞는지 확인!
+        if (!existingProject.getMember().getId().equals(member.getId())) {
+            throw new RuntimeException("이 현장을 삭제할 권한이 없습니다.");
+        }
+
+        projectRepository.delete(existingProject); // 완벽하게 삭제
+
+        // 삭제 성공 메시지 반환 (프론트에서 읽을 수 있게 ResponseEntity 사용)
+        return ResponseEntity.ok("현장이 안전하게 삭제되었습니다.");
     }
 
     // --- 내부 공통 로직 (현장 정보 저장) ---

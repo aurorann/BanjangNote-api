@@ -21,8 +21,8 @@ public class Assignment {
     @JoinColumn(name = "worker_id", nullable = false)
     private Worker worker;
 
-    @Column(columnDefinition = "DECIMAL(5,1) DEFAULT 0.0")
-    private Double days = 0.0;
+    @Column(columnDefinition = "integer default 0")
+    private Integer days = 0;
 
     @Column(name = "applied_daily_rate", nullable = false)
     private Integer appliedDailyRate;

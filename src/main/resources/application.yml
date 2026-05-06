@@ -14,11 +14,9 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      # none: DB 테이블을 자동으로 건드리지 않음 (SQL로 직접 관리할 것이므로 이게 안전함)
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
-        # 실행되는 SQL 쿼리를 콘솔창에 예쁘게 출력
         show_sql: true
         format_sql: true
 
