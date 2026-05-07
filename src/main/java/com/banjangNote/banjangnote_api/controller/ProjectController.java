@@ -30,12 +30,26 @@ public class ProjectController {
     @PostMapping
     public Project createProject(
             @RequestHeader("Authorization") String authHeader,
-            @RequestBody Project project) {
+            @RequestBody Map<String, Object> payload) { // 🔥 엔티티 대신 Map으로 받습니다.
 
+        // 1. 토큰에서 로그인한 사용자 정보 가져오기
         Member member = authService.getMemberFromHeader(authHeader);
+
+        // 2. 새 현장 객체 생성 및 주인 설정
+        Project project = new Project();
         project.setMember(member);
 
-        return projectRepository.save(project);
+        // 3. 내부 공통 로직(saveProjectDetails)을 활용해 기본 정보 저장
+        // 이 안에서 name, address, startDate, client 정보 등이 셋팅되고 저장됩니다.
+        Project savedProject = saveProjectDetails(project, payload);
+
+        // 4. 🔥 핵심: 작업자 투입 내역 저장 (saveWorkersToProject 활용)
+        if (payload.get("workers") != null) {
+            List<Map<String, Object>> workerList = (List<Map<String, Object>>) payload.get("workers");
+            saveWorkersToProject(savedProject, workerList);
+        }
+
+        return savedProject;
     }
 
     @GetMapping
