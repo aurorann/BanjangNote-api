@@ -8,8 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/projects")
@@ -53,10 +55,31 @@ public class ProjectController {
     }
 
     @GetMapping
-    public List<Project> getMyProjects(@RequestHeader("Authorization") String authHeader) {
+    public List<Project> getMyProjects(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam(required = false) Long clientId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
 
         Member member = authService.getMemberFromHeader(authHeader);
-        return projectRepository.findByMember(member); // 내 현장만 가져오기
+
+        // 1. 내 현장 모두 가져오기
+        List<Project> allMyProjects = projectRepository.findByMember(member);
+
+        // 2. 파라미터가 들어온 것만 Java Stream으로 필터링해서 반환!
+        return allMyProjects.stream()
+                // 업체 필터 (값이 들어왔을 때만 검사)
+                .filter(p -> clientId == null || (p.getClient() != null && p.getClient().getId().equals(clientId)))
+
+                // 시작일 필터 (이후 날짜)
+                .filter(p -> startDate == null || startDate.isEmpty() ||
+                        (p.getStartDate() != null && !p.getStartDate().isBefore(LocalDate.parse(startDate))))
+
+                // 종료일 필터 (이전 날짜)
+                .filter(p -> endDate == null || endDate.isEmpty() ||
+                        (p.getEndDate() != null && !p.getEndDate().isAfter(LocalDate.parse(endDate))))
+
+                .collect(Collectors.toList());
     }
 
     @PutMapping("/{id}")
