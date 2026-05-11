@@ -3,6 +3,7 @@ package com.banjangNote.banjangnote_api.controller;
 import com.banjangNote.banjangnote_api.entity.Assignment;
 import com.banjangNote.banjangnote_api.repository.AssignmentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public class AssignmentController {
     // GET: /api/projects/{projectId}/assignments (특정 현장의 작업자 리스트 조회)
     @GetMapping("/projects/{projectId}/assignments")
     public List<Assignment> getAssignmentsByProject(@PathVariable Long projectId) {
-        return assignmentRepository.findByProjectId(projectId);
+        Sort sort = Sort.by(Sort.Direction.ASC, "worker.name");
+        return assignmentRepository.findByProjectId(projectId, sort);
     }
 
     // PUT: /api/assignments/{id} (공수 증감 및 지급 여부 업데이트)

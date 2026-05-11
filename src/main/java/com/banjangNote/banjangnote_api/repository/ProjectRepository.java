@@ -2,11 +2,25 @@ package com.banjangNote.banjangnote_api.repository;
 
 import com.banjangNote.banjangnote_api.entity.Member;
 import com.banjangNote.banjangnote_api.entity.Project;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.time.LocalDate;
 
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    // 🔥 Spring Data JPA의 마법! 이름만 이렇게 지어주면 알아서 WHERE member_id = ? 쿼리를 짜줍니다.
-    List<Project> findByMember(Member member);
+    @Query("SELECT p FROM Project p WHERE p.member = :member " +
+            "AND (:clientId IS NULL OR p.client.id = :clientId) " +
+            "AND (CAST(:startDate AS date) IS NULL OR p.startDate >= :startDate) " +
+            "AND (CAST(:endDate AS date) IS NULL OR p.endDate <= :endDate) " +
+            "ORDER BY p.startDate DESC")
+    Page<Project> findFilteredProjects(
+            @Param("member") Member member,
+            @Param("clientId") Long clientId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            Pageable pageable
+    );
 }
