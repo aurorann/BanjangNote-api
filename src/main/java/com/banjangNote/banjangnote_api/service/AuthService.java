@@ -6,7 +6,7 @@ import com.banjangNote.banjangnote_api.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service // 🔥 스프링에게 "이거 공통 서비스야!" 라고 알려줍니다.
+@Service
 @RequiredArgsConstructor
 public class AuthService {
 

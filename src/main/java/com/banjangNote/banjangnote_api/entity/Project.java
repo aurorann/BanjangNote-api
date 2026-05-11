@@ -15,9 +15,14 @@ public class Project {
     private Long id;
 
     // 업체(Client)와 N:1 연결
-    @ManyToOne(fetch = FetchType.EAGER) // 테스트 확인을 위해 임시로 EAGER 설정
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "client_id")
     private Client client;
+
+    // 회원(Member)와 N:1 연결
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @Column(nullable = false, length = 100)
     private String name;
@@ -39,9 +44,4 @@ public class Project {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // 🔥 방금 만든 Member와의 다대일(N:1) 관계 설정
-    // 한 명의 회원은 여러 개의 현장을 가질 수 있습니다.
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
-    private Member member;
 }
