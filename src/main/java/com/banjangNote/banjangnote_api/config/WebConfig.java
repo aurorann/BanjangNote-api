@@ -9,10 +9,15 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // 모든 API 주소(/**)에 대하여
-                .allowedOriginPatterns("*") // 모든 도메인(Vercel 포함)의 접근을 허용
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
-                .allowedHeaders("*") // 모든 헤더 허용
-                .allowCredentials(true); // 인증 정보(쿠키 등) 포함 허용
+        registry.addMapping("/**")
+                .allowedOrigins(
+                        "https://banjangnote.vercel.app/",  // 실제 배포된 Vercel 주소 (필수)
+                        "http://localhost:3000",            // 로컬 개발 포트
+                        "http://127.0.0.1:3000"             // 루프백 주소 추가(예비)
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true)
+                .maxAge(3600); // 1시간 동안 OPTIONS 요청 결과 기억
     }
 }
