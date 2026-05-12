@@ -203,4 +203,17 @@ public class ProjectController {
             assignmentRepository.deleteAll(assignmentsToRemove);
         }
     }
+
+    // 특정 필드(수금 상태)만 업데이트하는 전용 엔드포인트
+    @PatchMapping("/{id}/settle")
+    public ResponseEntity<String> toggleSettleStatus(@PathVariable Long id) {
+        Project project = projectRepository.findById(id)
+                                           .orElseThrow(() -> new IllegalArgumentException("현장이 없습니다."));
+
+        // 현재 상태를 반전 (true -> false, false -> true)
+        project.setIsSettled(!project.getIsSettled());
+        projectRepository.save(project);
+
+        return ResponseEntity.ok("수금 상태가 변경되었습니다.");
+    }
 }
