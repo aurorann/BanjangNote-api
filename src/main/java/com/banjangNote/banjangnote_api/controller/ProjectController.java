@@ -123,6 +123,7 @@ public class ProjectController {
     private Project saveProjectDetails(Project project, Map<String, Object> payload) {
         project.setName(payload.get("name").toString());
         project.setAddress(payload.get("address") != null ? payload.get("address").toString() : "");
+        project.setMemo(payload.get("memo") != null ? payload.get("memo").toString() : "");
 
         if (payload.get("startDate") != null && !payload.get("startDate").toString().isEmpty()) {
             project.setStartDate(java.time.LocalDate.parse(payload.get("startDate").toString()));

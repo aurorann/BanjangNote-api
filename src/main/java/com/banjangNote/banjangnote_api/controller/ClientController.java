@@ -33,7 +33,7 @@ public class ClientController {
         return clientRepository.save(client);
     }
 
-    // ✏️ 3. 업체 정보 수정 (추가됨)
+    // 업체 정보 수정 (추가됨)
     @PutMapping("/{id}")
     public Client updateClient(
             @PathVariable Long id,
@@ -44,7 +44,7 @@ public class ClientController {
         Client existingClient = clientRepository.findById(id)
                                                 .orElseThrow(() -> new RuntimeException("해당 업체를 찾을 수 없습니다."));
 
-        // 🚨 권한 체크: DB에 저장된 주인의 ID와 요청한 회원의 ID가 같은지 확인
+        // 권한 체크: DB에 저장된 주인의 ID와 요청한 회원의 ID가 같은지 확인
         if (!existingClient.getMember().getId().equals(member.getId())) {
             throw new RuntimeException("이 업체를 수정할 권한이 없습니다.");
         }
@@ -57,7 +57,7 @@ public class ClientController {
         return clientRepository.save(existingClient);
     }
 
-    // 🗑️ 4. 업체 삭제 (추가됨)
+    // 업체 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteClient(
             @PathVariable Long id,
@@ -67,7 +67,7 @@ public class ClientController {
         Client existingClient = clientRepository.findById(id)
                                                 .orElseThrow(() -> new RuntimeException("해당 업체를 찾을 수 없습니다."));
 
-        // 🚨 권한 체크: 내 업체가 맞는지 확인
+        // 권한 체크: 내 업체가 맞는지 확인
         if (!existingClient.getMember().getId().equals(member.getId())) {
             throw new RuntimeException("이 업체를 삭제할 권한이 없습니다.");
         }
