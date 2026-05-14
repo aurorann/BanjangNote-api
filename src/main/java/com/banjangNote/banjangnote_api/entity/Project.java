@@ -47,4 +47,11 @@ public class Project {
     @Column(columnDefinition = "TEXT")
     private String memo;
 
+    public void setAddress(String address) {
+        this.address = (address == null || address.trim().isEmpty()) ? null : address.trim();
+    }
+
+    public void setMemo(String memo) {
+        this.memo = (memo == null || memo.trim().isEmpty()) ? null : memo.trim();
+    }
 }

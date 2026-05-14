@@ -24,4 +24,8 @@ public class Worker {
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    public void setRole(String role) {
+        this.role = (role == null || role.trim().isEmpty()) ? null : role.trim();
+    }
 }
