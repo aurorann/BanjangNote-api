@@ -33,7 +33,6 @@ public class Client {
     private Member member;
 
     public void setContactName(String contactName) {
-        // 값이 null이거나, 공백을 제거(trim)했을 때 비어있다면 null을 넣고, 아니면 공백을 제거한 깔끔한 값 넣음
         this.contactName = (contactName == null || contactName.trim().isEmpty()) ? null : contactName.trim();
     }
 

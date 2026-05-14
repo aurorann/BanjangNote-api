@@ -23,4 +23,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
             @Param("endDate") LocalDate endDate,
             Pageable pageable
     );
+
+    boolean existsByClientId(Long clientId);
 }

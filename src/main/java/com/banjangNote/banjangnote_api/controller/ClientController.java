@@ -4,6 +4,7 @@ import com.banjangNote.banjangnote_api.entity.Client;
 import com.banjangNote.banjangnote_api.entity.Member;
 import com.banjangNote.banjangnote_api.repository.ClientRepository;
 import com.banjangNote.banjangnote_api.repository.MemberRepository;
+import com.banjangNote.banjangnote_api.repository.ProjectRepository;
 import com.banjangNote.banjangnote_api.service.AuthService;
 import com.banjangNote.banjangnote_api.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class ClientController {
 
     private final ClientRepository clientRepository;
     private final AuthService authService;
+    private final ProjectRepository projectRepository;
 
     @GetMapping
     public List<Client> getAllClients(@RequestHeader("Authorization") String authHeader) {
@@ -70,6 +72,14 @@ public class ClientController {
         // 권한 체크: 내 업체가 맞는지 확인
         if (!existingClient.getMember().getId().equals(member.getId())) {
             throw new RuntimeException("이 업체를 삭제할 권한이 없습니다.");
+        }
+
+        // 업체를 발주처로 쓰는 현장(Project)이 단 하나라도 있는지 확인
+        boolean isUsedInProject = projectRepository.existsByClientId(id);
+
+        if (isUsedInProject) {
+            // 사용 중이라면 즉시 예외를 발생시켜 삭제를 차단하고, 프론트로 에러 메시지를 보냄
+            throw new RuntimeException("현재 등록된 현장에서 사용 중인 업체는 삭제할 수 없습니다.");
         }
 
         clientRepository.delete(existingClient);

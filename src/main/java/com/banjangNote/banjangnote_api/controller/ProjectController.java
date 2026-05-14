@@ -113,6 +113,28 @@ public class ProjectController {
             throw new RuntimeException("이 현장을 삭제할 권한이 없습니다.");
         }
 
+        // 해당 현장에 연결된 배정(Assignment) 내역 모두 조회
+        List<Assignment> assignments = assignmentRepository.findByProjectId(id);
+
+        // 이번에 지워질 작업자(Worker) 목록 미리 추출 (중복 제거)
+        List<Worker> workers = assignments.stream()
+                                          .map(Assignment::getWorker)
+                                          .distinct()
+                                          .collect(Collectors.toList());
+
+        // 자식 데이터인 배정(Assignment) 내역 먼저 일괄 삭제 (DB FK 에러 방지)
+        assignmentRepository.deleteAll(assignments);
+
+        // 작업자(Worker) 안전 삭제 로직 (마스터피스)
+        for (Worker worker : workers) {
+            // 방금 배정 내역을 지웠으므로, 이 작업자가 '다른 현장'에도 배정되어 있는지 검사
+            boolean isUsedElsewhere = assignmentRepository.existsByWorkerId(worker.getId());
+
+            // 다른 현장에서 일하고 있지 않다면(어디에도 속하지 않게 되었다면) 깔끔하게 삭제
+            if (!isUsedElsewhere) {
+                workerRepository.delete(worker);
+            }
+        }
         projectRepository.delete(existingProject);
 
         // 삭제 성공 메시지 반환 (프론트에서 읽을 수 있게 ResponseEntity 사용)

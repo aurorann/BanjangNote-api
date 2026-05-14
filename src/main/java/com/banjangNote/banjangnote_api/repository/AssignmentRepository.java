@@ -9,4 +9,5 @@ import java.util.List;
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     List<Assignment> findByProjectId(Long clientId, Sort sort);
     List<Assignment> findByProjectId(Long clientId);
+    boolean existsByWorkerId(Long workerId);
 }
