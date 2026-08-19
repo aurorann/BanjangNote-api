@@ -3,6 +3,7 @@ package com.banjangNote.banjangnote_api.controller;
 import com.banjangNote.banjangnote_api.entity.*;
 import com.banjangNote.banjangnote_api.repository.*;
 import com.banjangNote.banjangnote_api.service.AuthService;
+import com.banjangNote.banjangnote_api.service.MaterialService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +27,7 @@ public class ProjectController {
     private final AssignmentRepository assignmentRepository;
     private final WorkerRepository workerRepository;
     private final AuthService authService;
+    private final MaterialService materialService;
 
     @GetMapping("/{id}")
     public Project getProjectById(@PathVariable Long id) {
@@ -215,5 +217,17 @@ public class ProjectController {
         projectRepository.save(project);
 
         return ResponseEntity.ok("수금 상태가 변경되었습니다.");
+    }
+
+
+    /**
+     * API: POST /projects/{id}/materials
+     * 기능: 특정 프로젝트에 신규 부자재 내역을 추가합니다.
+     */
+    @PostMapping("/{id}/materials")
+    public ProjectMaterial createProjectMaterials(@PathVariable Long id,
+                                                  @RequestBody Map<String, Object> payload) {
+        // 권한 검증이 필요하다면 여기서 authService 등을 활용
+        return materialService.createProjectMaterial(id, payload);
     }
 }
